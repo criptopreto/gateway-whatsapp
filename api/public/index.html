@@ -1,0 +1,171 @@
+<html lang="es-VE">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" script-src="unsafe-inline" />
+
+    <title>¡Epale!</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../stylesheets/style.css" />
+  </head>
+
+  <body>
+    <div id="socket-container">
+      <div id="socket_info"><span id="socket_status">Socket Offline</span></div>
+      <button id="get_channels" onclick="getChannels()">Get Channels</button>
+      <input type="text" id="channel_name" placeholder="Nombre Canal" />
+      <input type="text" id="channel_id" placeholder="Número Telefónico" />
+      <button id="createChannel">Create Channel</button>
+      <input type="text" id="delete_channel" placeholder="Delete Channel" />
+      <button id="deleteChannel">Delete Channel</button>
+      <button id="login">Login</button>
+    </div>
+    <div id="channels">
+      <div id="channels_info">
+        <span id="channels_status">Channels Offline</span>
+      </div>
+      <ul id="channels_list"></ul>
+    </div>
+    <div id="chat-container">
+      <div id="chat-window">
+        <div id="output"></div>
+        <div id="actions"></div>
+      </div>
+      <!--mensajes enviados desde el dispositivo escaneado-->
+      <input id="message" type="text" placeholder="message" value="TEST" />
+      <input
+        id="device"
+        type="text"
+        value="584166071680"
+        placeholder="Device"
+      />
+      <input
+        id="serialized"
+        type="text"
+        value="584125532688"
+        placeholder="Destination"
+      />
+      <button id="send">Send</button>
+      <!--boton de envio evento, mesajes por chat ID-->
+      <input id="chat_id" type="text" placeholder="Chat ID" value="4313" />
+      <button class="send2" id="send2">Get Messages</button>
+    </div>
+
+    <div id="send_media">
+      <form
+        action="/message/medias"
+        method="post"
+        enctype="multipart/form-data"
+        id="form-media"
+      >
+        <label for="document">Archivos</label>
+        <input type="file" name="document" id="document" multiple />
+        <input type="text" name="texto" id="texto" placeholder="Texto" />
+        <input type="submit" value="Enviar" />
+      </form>
+    </div>
+
+    <div id="send_msg_a">
+      <p>Mensaje de prueba A</p>
+      <input
+        type="text"
+        name="chid_a"
+        id="chid_a"
+        placeholder="Channel ID A"
+        value="648af3fee34a35b57c47"
+      />
+      <input
+        type="text"
+        name="phone_a"
+        id="phone_a"
+        placeholder="Phone A"
+        value="584166071680"
+      />
+      <input
+        type="text"
+        name="message_a"
+        id="message_a"
+        placeholder="Message A"
+      />
+      <input
+        type="text"
+        name="destinatary_a"
+        id="destinatary_a"
+        placeholder="Destinatary A"
+        value="584241902113"
+      />
+      <button id="send_a">Enviar</button>
+    </div>
+
+    <div id="send_msg_b">
+      <p>Mensaje de prueba B</p>
+      <input type="text" name="chid_b" id="chid_b" placeholder="Channel ID B" />
+      <input type="text" name="phone_b" id="phone_b" placeholder="Phone B" />
+      <input
+        type="text"
+        name="message_b"
+        id="message_b"
+        placeholder="Message B"
+      />
+      <input
+        type="text"
+        name="destinatary_b"
+        id="destinatary_b"
+        placeholder="Destinatary B"
+      />
+      <button id="send_b">Enviar</button>
+    </div>
+    <div id="send_msg_mm">
+      <p>Enviar Multimedia</p>
+      <input
+        type="text"
+        name="media_name"
+        id="media_name"
+        placeholder="Media Name"
+        value="20b34db0aa9fe1377b5295e151738221"
+      />
+      <input
+        type="text"
+        name="mime_type"
+        id="mime_type"
+        placeholder="Mimetype"
+        value="audio/mpeg"
+      />
+      <input
+        type="text"
+        name="type"
+        id="type"
+        placeholder="Media Type"
+        value="audio"
+      />
+      <input
+        type="text"
+        name="phone_mm"
+        id="phone_mm"
+        placeholder="Phone"
+        value="584166071680"
+      />
+      <input
+        type="text"
+        name="message_mm"
+        id="message_mm"
+        placeholder="Message"
+      />
+      <input
+        type="text"
+        name="destinatary_mm"
+        id="destinatary_mm"
+        placeholder="Destinatary"
+      />
+      <button id="send_mm">Enviar Multimedia</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div class="chat_box"><div id="mensajes" class="chat-messages"></div></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="/index.js"></script>
+  </body>
+</html>
