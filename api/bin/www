@@ -1,0 +1,143 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+require("dotenv").config();
+var app = require("../app");
+var debug = require("debug")("api:server");
+var http = require("http");
+const { connect } = require("../database");
+const { logger } = require("../helpers/logger");
+const socketService = require("../services/socket.service");
+const crypto = require("crypto");
+const randomId = () => crypto.randomBytes(10).toString("hex");
+const rabbitmqService = require("../tools/amqp/rabbitmq_service");
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || "3000");
+app.set("port", port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Socket.io
+ */
+
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+io.use(async (socket, next) => {
+  const { auth } = socket.handshake;
+  const { user_id } = auth;
+
+  if (!user_id) {
+    logger.error("[SOCKET]: Error ❌");
+    return next(new Error("Authentication error"));
+  }
+
+  const session = await socketService.findByUserId(user_id);
+
+  if (!session) {
+    socket.session_id = randomId();
+    socket.user_id = user_id;
+    logger.info(
+      "Generated session ID: " + socket.session_id + " - socket id:" + socket.id
+    );
+
+    return next();
+  }
+
+  socket.session_id = session.session_id;
+  socket.socket_id = session._id;
+  socket.user_id = session.user;
+  return next();
+});
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on("error", onError);
+server.on("listening", onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== "listen") {
+    throw error;
+  }
+
+  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case "EACCES":
+      console.error(bind + " requires elevated privileges");
+      process.exit(1);
+      break;
+    case "EADDRINUSE":
+      console.error(bind + " is already in use");
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  debug("Listening on " + bind);
+  connect()
+    .then((result) => {
+      console.log(result);
+      rabbitmqService.connect();
+    })
+    .catch((err) => {
+      logger.error(err.message);
+      process.exit(1);
+    });
+}
+
+// socekt connection------------------------------------------------
+global.io = io;
+require("../tools/socket/engine");
